@@ -37,7 +37,53 @@ async function run() {
         const userCollection = client.db("usersDB").collection("userMS");
 
         // find all user
-        
+        app.get("/users", async (req, res) => {
+            const cursor = userCollection.find();
+            const result = await cursor.toArray();
+            res.send(result)
+        })
+
+        // create user
+        app.post("/users", async (req, res) => {
+            const user = req.body;
+            console.log(user)
+            const result = await userCollection.insertOne(user);
+            res.send(result);
+        })
+
+        // delete user
+        app.delete('/user/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await userCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // update user
+        app.put("/user/:id", async (req, res) => {
+            const id = req.params.id;
+            const user = req.body;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updateUser = {
+                $set: {
+                    name: user.name,
+                    email: user.email,
+                    gender: user.gender,
+                    status: user.status
+                }
+            }
+            const result = await userCollection.updateOne(filter, updateUser, options);
+            res.send(result);
+        })
+
+        app.get("/user/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await userCollection.findOne(query);
+            res.send(result);
+        })
+
 
 
         // Send a ping to confirm a successful connection
